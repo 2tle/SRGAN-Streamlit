@@ -5,7 +5,7 @@ import numpy as np
 from io import BytesIO
 import tensorflow as tf
 
-model_name = 'models/SRGAN_EP10000.h5'
+model_name = 'models/SRGAN_EP50000.h5'
 
 model = load_model(model_name)
 
@@ -20,7 +20,6 @@ def crop(im, default_size, crop_size):
     cropped_img = []
     cropped_img_size = []
     pos = []
-    imwidth, imheight = default_size
     for j in range(0,default_size[1],crop_size[1]):
         for i in range(0, default_size[0], crop_size[0]):
             if default_size[1] - j < 100 or default_size[0] - i < 100:
@@ -70,7 +69,7 @@ def afterProcessing(t,default_size):
     k = t[0] * 255
     k = k.astype(np.uint8)
     k = Image.fromarray(k)
-    k = k.resize(default_size)
+    #k = k.resize(default_size)
     return k
 def saveImage(k,format):
     buf = BytesIO()
@@ -79,9 +78,9 @@ def saveImage(k,format):
     return byte_im
 
 def saveImgsToOne(o, default_size, pos):
-    new_image = Image.new('RGB',default_size, (250,250,250))
+    new_image = Image.new('RGB',(default_size[0] * 4, default_size[1] * 4), (250,250,250))
     for x in range(len(o)):
-        new_image.paste(o[x],(pos[x][0],pos[x][1]))
+        new_image.paste(o[x],(pos[x][0] * 4,pos[x][1] * 4))
     return new_image
 
 
@@ -111,3 +110,4 @@ if uploaded_file is not None:
     st.success('Here is your high-resolution Image!!!')
     st.image(oneImg)
     st.download_button('Download', loc, file_name=filename, mime='image'+filetype)
+    st.download_button('Resize And Download', saveImage(oneImg.resize(default_size), filetype), file_name=filename, mime='image'+filetype)
